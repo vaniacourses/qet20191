@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Player {
 
@@ -15,17 +16,28 @@ public class Player {
     private Game game;
     private int resource;
     
-    public Player(String name, MaturityLevel mLevel, Game game){
+    public Player(String name){
         this.name = name;
         this.process = new HashMap<String, Process>();
         this.score = new Score();
         this.hand = new ArrayList<Card>();
-        this.currentMaturityLevel = mLevel;
-        this.game = game;
     }
 
     
-    public void addResource(int quantity){
+    
+    public Game getGame() {
+		return game;
+	}
+
+
+
+	public void setGame(Game game) {
+		this.game = game;
+	}
+
+
+
+	public void addResource(int quantity){
         this.resource += quantity;
     }
 
@@ -49,10 +61,14 @@ public class Player {
     public int getHandValue(){
         int cardValues = 0;
         for (Card card : hand){
-            int cardValue = card.getValue();
+            int cardValue = card.getValue().ordinal();
             cardValues += cardValue;
         }
         return cardValues;
+    }
+    
+    public void earnProcess(Process newProcess) {
+    	this.process.put(newProcess.getName(), newProcess);
     }
 
 
@@ -105,14 +121,24 @@ public class Player {
 		this.currentMaturityLevel = currentMaturityLevel;
 	}
     
-	public boolean levelUp(MaturityLevel newLevel) {
+	public boolean levelUp(MaturityLevel newLevel, Set<String> requirements) {
 		if (this.currentMaturityLevel.getLevel().ordinal() >= newLevel.getLevel().ordinal()) {
 			return false;
 		}
 		else {
-			//saber as cartas e artefatos que tenho para saber se posso mudar de nível
-		}
-			
+			boolean isAble = true;
+			for (String requirement : requirements){
+				if (this.getProcess().get(requirement) != null) {
+					isAble = false;
+					break;
+				}
+			}
+			if (isAble){
+				this.setCurrentMaturityLevel(newLevel);
+				this.process = new HashMap<String, Process>();
+			}
+			return isAble;
+		}			
 	}   
 
 }
